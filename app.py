@@ -7,7 +7,6 @@ import gdown
 
 # --- 1. KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Prediksi Nilai Ujian Siswa", page_icon="🎓", layout="centered")
-
 # --- 2. LOAD ARTEFAK DARI GOOGLE DRIVE ---
 @st.cache_resource
 def load_all_artifacts():
@@ -18,17 +17,17 @@ def load_all_artifacts():
     # Masukkan Google Drive File ID untuk masing-masing file
     # Ganti 'TULIS_ID_DISINI' dengan ID asli dari link Google Drive Anda
     drive_files = {
-        'preprocessor_final.pkl': '16iN_If9u75u13U3BTsFlFWgCU9YPsXgH',
-        'selected_features.pkl': '1vZbGmxtBh9H1xxoWjdzuVuKIgju84vmW',
-        'Linear_Original.pkl': '1Nv9IkuzmKx3CB3Lw--QfQyS7n_0Jj4Gj',
-        'RF_Original.pkl': '1H6SvdFR9T3VJQF9NhT8x86anu-DLwalQ',
-        'SVR_Original.pkl': '1289_G6t9IejCbkGoaW1tvhVmO56AA-N7',
-        'Linear_SMOGN.pkl': '120ntWVg-SWuGnmk2es9oh6JT1TbCQmZP',
-        'RF_SMOGN.pkl': '1hRFfPfVS71OaY4hpHZ1-UpFCgUp5AOUq',
-        'SVR_SMOGN.pkl': '1IHpzBRrCCiwBIzRcVTncsNz5Gq8kVko7',
-        'Linear_SMOTER.pkl': '1PHybBfo2JtaBMeYlZQrGdWT6go2LAIsO',
-        'RF_SMOTER.pkl': '1qK2pKaRgK9S71bU8sMKWHSEJbSeYdYXL',
-        'SVR_SMOTER.pkl': '1y6kQZLdsc90wCX_Tu2sRJr1zUH2Ak1Cp'
+        'preprocessor_final.pkl': '1DrJBsTMAdZp6Pl2YVghL2DE6Tpi2YGyR',
+        'selected_features.pkl': '118hwVyBA_DepA05Ts_Lld-UDUw3CiEb5',
+        'Linear_Original.pkl': '1op_rs1hNXWAP1RCmXmqnUcU68zfB58lr', 1
+        'RF_Original.pkl': '1sHYo-g4BJLGasXKWygEoQy9E-ySY-4q5',
+        'SVR_Original.pkl': '1C9VUk8q_Y2M9sz0AkN0xDcemAQPB2RzV',
+        'Linear_SMOGN.pkl': '1R1H5prTm6aJ7qJyJvOd0YjA0s2uTi3fH',2
+        'RF_SMOGN.pkl': '1ZdiuPuIzrAwoojP-9w-qrlMFX3yTW9wT',
+        'SVR_SMOGN.pkl': '14JbInNxOCZyQ-vVJbcn1QRbNyNXXdgxe',
+        'Linear_SMOTER.pkl': '1hLZc-S2D8kjDJlIS6Dl7fkVtZGYF0lhL',
+        'RF_SMOTER.pkl': '1qDxaB8bLGYzx1gZ4ovRfvjzGaoDDkRQC',
+        'SVR_SMOTER.pkl': '12imk5bODXLVj7M2MWVSLjhnyv_pV1icO'
     }
 
     # Download setiap file jika belum ada di folder lokal
@@ -80,7 +79,7 @@ numerical_features_list = ['age', 'family_size', 'studytime', 'attendance']
 
 # --- 4. TAMPILAN ANTARMUKA (UI) ---
 st.title("🎓 Sistem Prediksi Nilai Ujian Siswa")
-st.markdown("Masukkan data siswa di bawah ini untuk melihat prediksi nilai berdasarkan model **Random Forest (SMOTER)** beserta perbandingannya.")
+st.markdown("Masukkan data siswa di bawah ini untuk melihat prediksi nilai berdasarkan model **Random Forest (Original)** beserta perbandingannya.")
 st.markdown("---")
 
 with st.form("prediction_form"):
@@ -140,7 +139,7 @@ if submit_button:
                 pred_clipped = np.clip(pred_raw, 0, 100)
                 
                 # Simpan hasil spesifik untuk RF SMOTER sebagai prediksi utama
-                if name == 'RF_SMOTER':
+                if name == 'RF_Original':
                     st.session_state['prediksi_utama'] = round(pred_clipped, 2)
                 
                 predictions.append({
@@ -166,7 +165,7 @@ if st.session_state['prediksi_selesai']:
     
     # --- A. PREDIKSI UTAMA (RF SMOTER) ---
     st.markdown("### 🏆 Hasil Prediksi Utama")
-    st.info(f"Model Terbaik: **Random Forest (SMOTER)**")
+    st.info(f"Model Terbaik: **Random Forest (Original)**")
     st.metric(label="Estimasi Nilai Ujian Siswa", value=f"{st.session_state['prediksi_utama']} / 100")
     
     # --- B. FEATURE IMPORTANCE & KOEFISIEN ---
