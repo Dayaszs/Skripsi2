@@ -214,6 +214,6 @@ if st.session_state['prediksi_selesai']:
     st.write("Berikut adalah perbandingan estimasi nilai dari seluruh kombinasi algoritma dan teknik sampling dataset:")
     
     st.dataframe(
-        st.session_state['tabel_prediksi'].style.highlight_max(axis=None, color='lightgreen').highlight_min(axis=None, color='lightcoral'),
+      st.session_state['tabel_prediksi'],
         width='stretch'
     )
