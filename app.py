@@ -80,7 +80,7 @@ numerical_features_list = ['age', 'family_size', 'studytime', 'attendance']
 
 # --- 4. TAMPILAN ANTARMUKA (UI) ---
 st.title("🎓 Sistem Prediksi Nilai Ujian Siswa")
-st.markdown("Masukkan data siswa di bawah ini untuk melihat perbandingan prediksi dari 9 model Machine Learning.")
+st.markdown("Masukkan data siswa di bawah ini untuk melihat prediksi nilai berdasarkan model **Random Forest (SMOTER)** beserta perbandingannya.")
 st.markdown("---")
 
 with st.form("prediction_form"):
@@ -119,9 +119,10 @@ with st.form("prediction_form"):
 if 'prediksi_selesai' not in st.session_state:
     st.session_state['prediksi_selesai'] = False
     st.session_state['tabel_prediksi'] = None
+    st.session_state['prediksi_utama'] = None
 
 if submit_button:
-    with st.spinner("Menghitung prediksi dari ke-9 model..."):
+    with st.spinner("Menghitung prediksi..."):
         try:
             # 1. Format input ke DataFrame dan Transform
             df_input = pd.DataFrame([user_input])
@@ -137,6 +138,10 @@ if submit_button:
                 
                 pred_raw = model.predict(X_input_proc)[0]
                 pred_clipped = np.clip(pred_raw, 0, 100)
+                
+                # Simpan hasil spesifik untuk RF SMOTER sebagai prediksi utama
+                if name == 'RF_SMOTER':
+                    st.session_state['prediksi_utama'] = round(pred_clipped, 2)
                 
                 predictions.append({
                     "Algoritma": algo,
@@ -155,35 +160,30 @@ if submit_button:
         except Exception as e:
             st.error(f"❌ Terjadi kesalahan saat memproses data: {e}")
 
-# --- TAMPILKAN HASIL JIKA PREDIKSI SUDAH DILAKUKAN ---
+# --- 6. TAMPILKAN HASIL JIKA PREDIKSI SUDAH DILAKUKAN ---
 if st.session_state['prediksi_selesai']:
     st.success("Prediksi berhasil dilakukan!")
-    st.markdown("### 📈 Perbandingan Hasil Prediksi (Skor 0-100)")
     
-    # Ambil tabel dari memori
-    st.dataframe(
-        st.session_state['tabel_prediksi'].style.highlight_max(axis=None, color='lightgreen').highlight_min(axis=None, color='lightcoral'),
-        width='stretch'
-    )
+    # --- A. PREDIKSI UTAMA (RF SMOTER) ---
+    st.markdown("### 🏆 Hasil Prediksi Utama")
+    st.info(f"Model Terbaik: **Random Forest (SMOTER)**")
+    st.metric(label="Estimasi Nilai Ujian Siswa", value=f"{st.session_state['prediksi_utama']} / 100")
     
-    # --- TAMPILKAN FEATURE IMPORTANCE & KOEFISIEN ---
+    # --- B. FEATURE IMPORTANCE & KOEFISIEN ---
     st.markdown("---")
     st.markdown("### 🔍 Interpretasi Model (Feature Importance & Koefisien)")
     st.write("Pilih model di bawah ini untuk melihat fitur spesifik apa yang paling memengaruhi prediksinya.")
     
-    # Dropdown di luar blok submit_button agar tidak hilang saat di-klik
     interpretable_models = [
-        'RF_Original', 'RF_SMOGN', 'RF_SMOTER', 
+        'RF_SMOTER', 'RF_Original', 'RF_SMOGN', 
         'Linear_Original', 'Linear_SMOGN', 'Linear_SMOTER'
     ]
     
     selected_interp_model = st.selectbox("Pilih Model:", interpretable_models)
     
-    # Ambil model yang dipilih dari dictionary models
     model_to_explain = models.get(selected_interp_model)
     encoded_feature_names = preprocessor.get_feature_names_out()
     
-    # Cek apakah ini model RF atau Linear
     if "RF" in selected_interp_model:
         weights = model_to_explain.feature_importances_
         col_name = "Importance (%)"
@@ -192,23 +192,28 @@ if st.session_state['prediksi_selesai']:
         weights = model_to_explain.coef_
         col_name = "Koefisien"
     
-    # Buat DataFrame untuk interpretasi
     df_weights = pd.DataFrame({
         "Fitur (Transformed)": encoded_feature_names,
         col_name: weights
     })
     
-    # Urutkan berdasarkan nilai absolut terbesar
     df_weights['Nilai Absolut'] = df_weights[col_name].abs()
     df_weights = df_weights.sort_values(by='Nilai Absolut', ascending=False).drop(columns=['Nilai Absolut']).reset_index(drop=True)
     df_weights.index = np.arange(1, len(df_weights) + 1)
     
-    # Tampilkan 15 fitur teratas
-    st.write(f"**Fitur Paling Berpengaruh pada {selected_interp_model}:**")
+    st.write(f"**15 Fitur Paling Berpengaruh pada {selected_interp_model}:**")
     
     if "RF" in selected_interp_model:
         st.dataframe(df_weights.head(15).style.format({col_name: '{:.2f}%'}), width='stretch')
-        
     else:
         st.dataframe(df_weights.head(15).style.format({col_name: '{:.4f}'}), width='stretch')
-        
+
+    # --- C. TABEL PERBANDINGAN MODEL (DIPINDAH KE BAWAH) ---
+    st.markdown("---")
+    st.markdown("### 📈 Perbandingan Hasil Prediksi 9 Model")
+    st.write("Berikut adalah perbandingan estimasi nilai dari seluruh kombinasi algoritma dan teknik sampling dataset:")
+    
+    st.dataframe(
+        st.session_state['tabel_prediksi'].style.highlight_max(axis=None, color='lightgreen').highlight_min(axis=None, color='lightcoral'),
+        width='stretch'
+    )
