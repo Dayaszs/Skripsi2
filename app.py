@@ -19,10 +19,10 @@ def load_all_artifacts():
     drive_files = {
         'preprocessor_final.pkl': '1DrJBsTMAdZp6Pl2YVghL2DE6Tpi2YGyR',
         'selected_features.pkl': '118hwVyBA_DepA05Ts_Lld-UDUw3CiEb5',
-        'Linear_Original.pkl': '1op_rs1hNXWAP1RCmXmqnUcU68zfB58lr', 1
+        'Linear_Original.pkl': '1op_rs1hNXWAP1RCmXmqnUcU68zfB58lr',
         'RF_Original.pkl': '1sHYo-g4BJLGasXKWygEoQy9E-ySY-4q5',
         'SVR_Original.pkl': '1C9VUk8q_Y2M9sz0AkN0xDcemAQPB2RzV',
-        'Linear_SMOGN.pkl': '1R1H5prTm6aJ7qJyJvOd0YjA0s2uTi3fH',2
+        'Linear_SMOGN.pkl': '1R1H5prTm6aJ7qJyJvOd0YjA0s2uTi3fH',
         'RF_SMOGN.pkl': '1ZdiuPuIzrAwoojP-9w-qrlMFX3yTW9wT',
         'SVR_SMOGN.pkl': '14JbInNxOCZyQ-vVJbcn1QRbNyNXXdgxe',
         'Linear_SMOTER.pkl': '1hLZc-S2D8kjDJlIS6Dl7fkVtZGYF0lhL',
