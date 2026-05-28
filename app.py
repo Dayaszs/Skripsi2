@@ -19,7 +19,7 @@ def load_models():
 
 models_data = load_models()
 
-# --- 3. KAMUS MAPPING (Hanya yang digunakan oleh top features) ---
+# --- 3. KAMUS MAPPING ---
 pendidikan_map = {
     'Tidak Sekolah': 0, 'SD/Sederajat': 1, 'SMP/Sederajat': 2,
     'SMA/SMK/Sederajat': 3, 'Diploma (D1/D2/D3)': 4,
@@ -33,16 +33,9 @@ penghasilan_map = {
 ukuran_keluarga_map = {'1 Orang': 1, '2-3 Orang': 2, '4-5 Orang': 3, '6 Orang atau lebih': 4}
 waktu_tempuh_map = {'Kurang dari 15 menit': 0, '15 - 30 menit': 1, '31 - 60 menit': 2, 'Lebih dari 60 menit': 3}
 
-# --- KONFIGURASI MODEL TERBAIK ---
-best_models_keys = {
-    'Matematika': 'pipeline_RFR',       # R2: 0.7948
-    'Bahasa Inggris': 'pipeline_SVR',   # R2: 0.8397
-    'Bahasa Indonesia': 'pipeline_RFR'  # R2: 0.7075
-}
-
 # --- 4. TAMPILAN ANTARMUKA (UI) ---
 st.title("🎓 Prediksi Nilai Semester 2 dengan AI")
-st.markdown("Aplikasi ini secara otomatis menggunakan model **Linear Regression** untuk Matematika, **SVR** untuk B. Inggris, dan **Random Forest** untuk B. Indonesia berdasarkan performa terbaiknya.")
+st.markdown("Berdasarkan evaluasi statistik, ketiga algoritma prediksi (MLR, SVR, RFR) memiliki performa yang setara dan sangat akurat (Tingkat kesalahan/MAPE < 2.5%). Aplikasi ini akan menampilkan proyeksi nilai dari ketiga algoritma tersebut sebagai bahan pertimbangan komprehensif.")
 st.markdown("---")
 
 if models_data:
@@ -53,26 +46,22 @@ if models_data:
         
         # --- BLOK 1: NILAI SEMESTER 1 ---
         with col1:
-            st.markdown("**📊 Nilai Lintas Semester (Kelas X Smt 1)**")
-            nilai_mtk = st.number_input("Nilai Matematika (Smt 1)", min_value=0, max_value=100, value=80)
-            nilai_ing = st.number_input("Nilai Bahasa Inggris (Smt 1)", min_value=0, max_value=100, value=80)
-            nilai_ind = st.number_input("Nilai Bahasa Indonesia (Smt 1)", min_value=0, max_value=100, value=80)
-            
-            st.markdown("**🧠 Motivasi & Sikap**")
-            motivasi = st.slider("Motivasi Belajar Pribadi (Skala 1-5)", 1, 5, 3)
-            dukungan = st.slider("Dukungan Orang Tua (Skala 1-5)", 1, 5, 3)
+            st.markdown("**📊 Nilai Historis (Prediktor Absolut)**")
+            nilai_mtk = st.number_input("Nilai Matematika (Kelas X Smt 1)", min_value=0, max_value=100, value=80)
+            nilai_ing = st.number_input("Nilai Bahasa Inggris (Kelas X Smt 1)", min_value=0, max_value=100, value=80)
+            nilai_ind = st.number_input("Nilai Bahasa Indonesia (Kelas X Smt 1)", min_value=0, max_value=100, value=80)
 
         # --- BLOK 2: KEBIASAAN BELAJAR ---
         with col2:
-            st.markdown("**📚 Kebiasaan & Kedisiplinan**")
+            st.markdown("**📚 Perilaku Belajar & Kedisiplinan**")
             jam_belajar = st.number_input("Jam Belajar di Luar Sekolah (Jam/Minggu)", min_value=0, max_value=100, value=10)
-            absen = st.number_input("Jumlah Ketidakhadiran (Hari)", min_value=0, max_value=50, value=0)
+            absen = st.number_input("Jumlah Ketidakhadiran (Smt 2)", min_value=0, max_value=50, value=0)
             ekskul = st.number_input("Jumlah Ekstrakurikuler yang diikuti", min_value=0, max_value=10, value=1)
             waktu_tempuh = st.selectbox("Waktu Tempuh ke Sekolah", list(waktu_tempuh_map.keys()))
 
         # --- BLOK 3: LATAR BELAKANG KELUARGA ---
         with col3:
-            st.markdown("**🏡 Latar Belakang Keluarga**")
+            st.markdown("**🏡 Latar Belakang Sosial-Ekonomi**")
             pend_ayah = st.selectbox("Pendidikan Terakhir Ayah", list(pendidikan_map.keys()))
             pend_ibu = st.selectbox("Pendidikan Terakhir Ibu", list(pendidikan_map.keys()))
             penghasilan = st.selectbox("Total Penghasilan Ortu/Bulan", list(penghasilan_map.keys()))
@@ -83,7 +72,7 @@ if models_data:
 
     # --- 5. LOGIKA PREDIKSI ---
     if submit_button:
-        with st.spinner("Memproses dengan model AI terbaik..."):
+        with st.spinner("Memproses dengan model komputasi MLR, SVR, dan RFR..."):
             # 1. Tampung input mentah & mapping ke format model
             mapped_input = {
                 'Nilai Matematika (Kelas X Semester 1)': nilai_mtk,
@@ -96,49 +85,76 @@ if models_data:
                 'Pendidikan terakhir Ibu': pendidikan_map[pend_ibu],
                 'Total penghasilan (per bulan) kedua orang tua pada saat kelas X': penghasilan_map[penghasilan],
                 'Ukuran keluarga inti pada saat kelas X (Total berapa anggota keluarga inti (termasuk Anda) yang tinggal serumah?)': ukuran_keluarga_map[keluarga],
-                'Waktu tempuh dari rumah ke sekolah Pada Saat Kelas X (Berapa perkiraan durasi perjalanan dari rumah hingga sampai di sekolah?)': waktu_tempuh_map[waktu_tempuh],
-                'Motivasi Belajar Pribadi pada saat kelas X': motivasi,
-                'Tingkat dukungan orang tua terhadap pendidikan Anda pada saat kelas X': dukungan
+                'Waktu tempuh dari rumah ke sekolah Pada Saat Kelas X (Berapa perkiraan durasi perjalanan dari rumah hingga sampai di sekolah?)': waktu_tempuh_map[waktu_tempuh]
             }
             
-            hasil_prediksi = {}
-            targets = ['Matematika', 'Bahasa Inggris', 'Bahasa Indonesia']
+            # Key aktual yang ada di dalam model .pkl Anda
+            targets = ['Matematika_top_7', 'Bahasa Inggris_top_7', 'Bahasa Indonesia_top_7']
             
-            # 2. Iterasi Prediksi per Mata Pelajaran
-            for mapel in targets:
-                target_data = models_data[mapel]
+            # Dictionary untuk menerjemahkan nama file ke nama UI yang rapi
+            display_names = {
+                'Matematika_top_7': 'Matematika',
+                'Bahasa Inggris_top_7': 'Bahasa Inggris',
+                'Bahasa Indonesia_top_7': 'Bahasa Indonesia'
+            }
+            
+            # Dictionary untuk menyimpan hasil semua model
+            hasil_prediksi = {'Matematika': {}, 'Bahasa Inggris': {}, 'Bahasa Indonesia': {}}
+            models_to_run = {'MLR': 'pipeline_MLR', 'SVR': 'pipeline_SVR', 'RFR': 'pipeline_RFR'}
+            
+            # 2. Iterasi Prediksi per Mata Pelajaran dan per Model
+            for mapel_key in targets:
+                target_data = models_data[mapel_key]
                 fitur_terpilih = target_data['selected_features']
+                nama_display = display_names[mapel_key] # Ambil nama bersih untuk UI
                 
-                # Dinamis mengambil model terbaik yang sudah ditentukan di atas
-                selected_model_key = best_models_keys[mapel]
-                model_prediksi = target_data[selected_model_key]
-                
-                # Buat DataFrame kosong khusus untuk fitur yang dibutuhkan (10, 8, atau 11 fitur)
-                df_X = pd.DataFrame(columns=fitur_terpilih)
-                df_X.loc[0] = 0 # Inisialisasi baris pertama
-                
-                # Isi nilai dari mapped_input ke kolom yang sesuai
-                for col in df_X.columns:
-                    if col in mapped_input:
-                        df_X.at[0, col] = mapped_input[col]
-                
-                # Lakukan Prediksi
-                pred_val = model_prediksi.predict(df_X)[0]
-                hasil_prediksi[mapel] = np.clip(pred_val, 0, 100) # Pastikan rentang nilai masuk akal 0-100
+                for nama_model, model_key in models_to_run.items():
+                    model_prediksi = target_data[model_key]
+                    
+                    # Buat DataFrame kosong khusus untuk fitur yang dibutuhkan
+                    df_X = pd.DataFrame(columns=fitur_terpilih)
+                    df_X.loc[0] = 0 # Inisialisasi baris pertama
+                    
+                    # Isi nilai dari mapped_input ke kolom yang sesuai (Robust matching)
+                    for col in df_X.columns:
+                        for key in mapped_input:
+                            if col == key or col.startswith(key[:20]):
+                                df_X.at[0, col] = mapped_input[key]
+                                break
+                    
+                    # Lakukan Prediksi
+                    pred_val = model_prediksi.predict(df_X)[0]
+                    # Simpan hasil di dictionary menggunakan nama display yang bersih
+                    hasil_prediksi[nama_display][nama_model] = np.clip(pred_val, 0, 100)
             
             st.session_state['hasil_prediksi'] = hasil_prediksi
             st.session_state['prediksi_selesai'] = True
 
     # --- 6. TAMPILKAN HASIL ---
     if st.session_state.get('prediksi_selesai', False):
-        st.success("✅ Analisis Berhasil! Berikut adalah proyeksi nilai siswa tersebut di Semester 2:")
+        st.success("✅ Analisis Berhasil! Proyeksi nilai dari ketiga algoritma:")
         
         hasil = st.session_state['hasil_prediksi']
         
         col_m1, col_m2, col_m3 = st.columns(3)
-        col_m1.metric(label="📐 Prediksi Matematika (Model RFR)", value=f"{hasil['Matematika']:.2f}")
-        col_m2.metric(label="🗣️ Prediksi B. Inggris (Model SVR)", value=f"{hasil['Bahasa Inggris']:.2f}")
-        col_m3.metric(label="📖 Prediksi B. Indonesia (Model RFR)", value=f"{hasil['Bahasa Indonesia']:.2f}")
+        
+        with col_m1:
+            st.markdown("### 📐 Matematika")
+            st.info(f"**MLR:** {hasil['Matematika']['MLR']:.2f}")
+            st.success(f"**SVR:** {hasil['Matematika']['SVR']:.2f}")
+            st.warning(f"**RFR:** {hasil['Matematika']['RFR']:.2f}")
+
+        with col_m2:
+            st.markdown("### 🗣️ B. Inggris")
+            st.info(f"**MLR:** {hasil['Bahasa Inggris']['MLR']:.2f}")
+            st.success(f"**SVR:** {hasil['Bahasa Inggris']['SVR']:.2f}")
+            st.warning(f"**RFR:** {hasil['Bahasa Inggris']['RFR']:.2f}")
+
+        with col_m3:
+            st.markdown("### 📖 B. Indonesia")
+            st.info(f"**MLR:** {hasil['Bahasa Indonesia']['MLR']:.2f}")
+            st.success(f"**SVR:** {hasil['Bahasa Indonesia']['SVR']:.2f}")
+            st.warning(f"**RFR:** {hasil['Bahasa Indonesia']['RFR']:.2f}")
         
         st.markdown("---")
-        st.caption("🔍 **Catatan**: Nilai historis Semester 1 menyumbang faktor prediksi terbesar (>70%), diikuti oleh kedisiplinan belajar (Jam belajar & Kehadiran).")
+        st.caption("🔍 **Catatan Analisis**: Karena ketiga model secara statistik setara (*p-value* > 0.05 pada Uji Wilcoxon), nilai-nilai di atas merupakan rentang wajar prediksi yang sah. Anda dapat menggunakan nilai rata-rata dari ketiga model ini sebagai prediksi final (Ensemble) yang sangat stabil.")
